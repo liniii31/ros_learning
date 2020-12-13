@@ -1,0 +1,6 @@
+<launch>
+      <node pkg="ros_learning" type="moving_frame.py" name="server" />
+      <node pkg="ros_learning" type="client.py" name="teleop" output="screen"/>
+      <node type="rviz" name="rviz" pkg="rviz" />
+
+</launch>
