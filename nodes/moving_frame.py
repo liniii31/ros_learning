@@ -1,34 +1,44 @@
 #!/usr/bin/env python  
 
-import roslib
-roslib.load_manifest('ros_learning')
-from ros_learning.srv import *
 import rospy
-import tf
-import time
+
+# Because of transformations
+import tf_conversions
 import math
+import tf2_ros
+import geometry_msgs.msg
+import turtlesim.msg
+from ros_learning.srv import *
 
 
-def handle_frame(req):
-      
-    br = tf.TransformBroadcaster()
-    rate = rospy.Rate(10.0)
-    br.sendTransform((3.0, 3.0, 0.0),
-                         (0.0, 0.0, 0.0, 1.0),
-                         rospy.Time.now(),
-                         "base_link",
-                         "map")
-    print("..................STARTED................")
-    t_end = time.time() + req.s1
-    while time.time() < t_end:
-        t = rospy.Time.now().to_sec() * math.pi
-        br.sendTransform((3.0 * math.sin(t), 3.0 * math.cos(t), 0.0),(0.0, 0.0, 0.0, 1.0),rospy.Time.now(),"base_link","map")
-        rate.sleep()
-       
+
+def handle_turtle_pose(msg):
+    br = tf2_ros.TransformBroadcaster()
+    t = geometry_msgs.msg.TransformStamped()
+    t.header.stamp = rospy.Time.now()
+    t.header.frame_id = "map"
+    t.child_frame_id = "base_link"
+    t.transform.translation.x = msg.x
+    t.transform.translation.y = msg.y
+    t.transform.translation.z = 0.0
+    q = tf_conversions.transformations.quaternion_from_euler(0, 0, msg.theta)
+    t.transform.rotation.x = q[0]
+    t.transform.rotation.y = q[1]
+    t.transform.rotation.z = q[2]
+    t.transform.rotation.w = q[3]
+    br.sendTransform(t)
+
+
+def handle(req):
+    rospy.Subscriber('/turtle1/pose',
+                     turtlesim.msg.Pose,
+                     handle_turtle_pose)
+    rospy.spin()  
+           
     
 
 def revolve():
-    s = rospy.Service('move_in_circle', srv_msg, handle_frame)
+    s = rospy.Service('move_in_circle', srv_msg, handle)
     
     rospy.spin()
 
