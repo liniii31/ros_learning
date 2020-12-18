@@ -1,7 +1,4 @@
 <launch>
-      <node pkg="turtlesim" type="turtlesim_node" name="sim"/>  
-      <node pkg="rostopic" type="rostopic" name="arbitrary_name" args="pub /turtle1/cmd_vel geometry_msgs/Twist -r 1 -- '{linear: {x: 2.0, y: 0.0, z: 0.0}, angular: {x: 0.0,y: 0.0,z: 1.8}}'" output="screen"/>
-      <node pkg="ros_learning" type="moving_frame.py" name="server" />
-      <node type="rviz" name="rviz" pkg="rviz" />
-      
+  <node pkg="ros_learning" name="server" type="moving_frame.py"/>
+  <node pkg="rviz" name="rviz" type="rviz"/>
 </launch>
