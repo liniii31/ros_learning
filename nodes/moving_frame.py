@@ -6,7 +6,7 @@ import tf2_ros
 import tf_conversions
 import geometry_msgs.msg
 
-def publisher():
+def publisher(omega,radius):
     br = tf2_ros.TransformBroadcaster()
     t = geometry_msgs.msg.TransformStamped()
     
@@ -14,16 +14,15 @@ def publisher():
     rate = rospy.Rate(10)
     # timer counter [second], increase 0.01 in each period
     tick = 0
-    # angular velocity [rad/s]
-    omega = 1.0
+    
     while not rospy.is_shutdown():
         t.header.stamp = rospy.Time.now()
         t.header.frame_id = "map"
         t.child_frame_id = "base_link"
         # This is target angle around z axis
         theta = omega*tick
-        t.transform.translation.x = math.sin(theta)
-        t.transform.translation.y = math.cos(theta)
+        t.transform.translation.x = math.sin(theta)*radius
+        t.transform.translation.y = math.cos(theta)*radius
         t.transform.translation.z = 0
         # The orientation should be set as you did
         # set it negative because we want to make x-xaxis to frontal direction
@@ -39,8 +38,9 @@ def publisher():
 
 if __name__ == '__main__':
     rospy.init_node('publisher', anonymous=True)
-
+    omega = rospy.get_param('~omega')       # angular velocity [rad/s]
+    radius = rospy.get_param('~radius')
     try:
-        publisher()
+        publisher(omega,radius)
     except rospy.ROSInterruptException:
         pass
