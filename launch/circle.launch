@@ -1,7 +1,8 @@
 <launch>
-    <node pkg="ros_learning" name="moving_frame" type="moving_frame.py">  
-        <param name="omega" type="double" value="50" />
-        <param name="radius" type="double" value="5" />
+    <node pkg="ros_learning" name="moving_frame" type="moving_frame.py" output="screen">  
+        <param name="omega" type="double" value="1" />
+        <param name="radius" type="double" value="3" />
+        <param name="rate" type="int" value="10" />
     </node>
     <node pkg="rviz" name="rviz" type="rviz"/>
 </launch>

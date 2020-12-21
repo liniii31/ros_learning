@@ -5,15 +5,18 @@ import math
 import tf2_ros
 import tf_conversions
 import geometry_msgs.msg
+from ros_learning.srv import *
 
-def publisher(omega,radius):
+
+def publisher(omega,radius,rate):
     br = tf2_ros.TransformBroadcaster()
     t = geometry_msgs.msg.TransformStamped()
     
-    # periodic rate: 10 [hz]
-    rate = rospy.Rate(10)
-    # timer counter [second], increase 0.01 in each period
+    # periodic rate: 
+    r = rospy.Rate(rate)
+    # timer counter [second]
     tick = 0
+    inc = 1. /rate      #increment of tick for different vaues of periodic rate
     
     while not rospy.is_shutdown():
         t.header.stamp = rospy.Time.now()
@@ -33,14 +36,17 @@ def publisher(omega,radius):
         t.transform.rotation.w = q[3]
         br.sendTransform(t)
         # Next period
-        tick += 0.01
-        rate.sleep()
+        tick = tick + inc
+        r.sleep()
 
 if __name__ == '__main__':
+
     rospy.init_node('publisher', anonymous=True)
     omega = rospy.get_param('~omega')       # angular velocity [rad/s]
     radius = rospy.get_param('~radius')
+    rate = rospy.get_param('~rate')
     try:
-        publisher(omega,radius)
+        
+        publisher(omega,radius,rate)
     except rospy.ROSInterruptException:
         pass
