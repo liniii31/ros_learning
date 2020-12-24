@@ -1,5 +1,7 @@
 <launch>
-    <node pkg="ros_learning" name="moving_frame" type="moving_frame.py" output="screen">  
+    <param name="robot_description" textfile="$(find ros_learning)/nodes/bot.urdf" />
+    <node pkg="ros_learning" name="moving_frame" type="moving_frame.py" output="screen">
+
         <param name="omega" type="double" value="1" />
         <param name="radius" type="double" value="3" />
         <param name="rate" type="int" value="10" />
