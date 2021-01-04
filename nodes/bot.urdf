@@ -3,7 +3,7 @@
   <link name="base_link">
     <visual>
       <geometry>
-      	<mesh filename="package://ros_learning/meshes/wheel.dae"/>
+      	<mesh filename="package://ros_learning/meshes/body.stl"/>
       </geometry>
     </visual>
   </link>
