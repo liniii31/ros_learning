@@ -17,8 +17,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 add_service_files(
    FILES
-   start.srv
-   stop.srv
+   Start.srv
+   Stop.srv
  )
 generate_messages(
    DEPENDENCIES
