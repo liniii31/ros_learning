@@ -13,10 +13,12 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   turtlesim
   message_generation
+  urdf
 )
 add_service_files(
    FILES
-   srv_msg.srv
+   Start.srv
+   Stop.srv
  )
 generate_messages(
    DEPENDENCIES
