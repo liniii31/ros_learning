@@ -3,6 +3,7 @@
     <arg name="gui" default="true" />
     <param name="robot_description" textfile="$(find ros_learning)/urdf/scara.urdf" />
     <param name="use_gui" value="$(arg gui)"/>
+    <node pkg="ros_learning" name="ik" type="inverse_kinematics.py" output="screen"/>
     <node pkg="ros_learning" name="moving_frame" type="moving_frame.py" output="screen">
 
         <param name="omega" type="double" value="1" />
