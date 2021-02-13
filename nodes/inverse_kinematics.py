@@ -20,7 +20,7 @@ def listener():
     while not rospy.is_shutdown():
         try:
             # Listening the pose of the tool frame , represented by Quaternions
-            trans = tfBuffer.lookup_transform('tool', 'base_link', rospy.Time())
+            trans = tfBuffer.lookup_transform('base_link', 'tool', rospy.Time())
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             rate.sleep()
             continue
@@ -68,17 +68,18 @@ def listener():
         # ⎢                              ⎥
         # ⎣ 0       0        0    1      ⎦
 
-        phi = math.acos(math.cos(alpha)*math.cos(beta))
+        phi = math.atan2(math.sin(alpha)*math.cos(beta),math.cos(alpha)*math.cos(beta))
+        theta123 = math.atan2(math.sin(phi),math.cos(phi))
         #finding theta2 
         cos_theta2 = (math.pow(x,2)+math.pow(y,2)-math.pow(a1,2)-math.pow(a2,2))/(2*a1*a2)  
         sin_theta2 = math.sqrt(abs(1-math.pow(cos_theta2,2)))
         i.theta2 = math.atan2(sin_theta2,cos_theta2)
         #finding theta1
-        cos_theta1 = (((a1+(a2*cos_theta2))*x)-(a2*sin_theta2*y))/((math.pow(a2*sin_theta2,2))+(math.pow(a1+(a2*cos_theta2),2)))
-        sin_theta1 = ((a2*sin_theta2*x)+((a1+(a2*cos_theta2))*y))/((math.pow(a2*sin_theta2,2))+(math.pow(a1+(a2*cos_theta2),2)))
+        cos_theta1 = (((a1+(a2*cos_theta2))*x)+(a2*sin_theta2*y))/((math.pow(a1+(a2*cos_theta2),2))-(math.pow(a2*sin_theta2,2)))
+        sin_theta1 = (((a1+(a2*cos_theta2))*y)-(a2*sin_theta2*x))/((math.pow(a1+(a2*cos_theta2),2))-(math.pow(a2*sin_theta2,2)))
         i.theta1 = math.atan2(sin_theta1,cos_theta1)
         #finding theta4
-        i.theta4 = phi-i.theta1-i.theta2
+        i.theta4 = theta123-i.theta1-i.theta2
         #finding b3
         i.b3 = z-b1-b2+b4
 
