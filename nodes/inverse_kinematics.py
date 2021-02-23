@@ -8,8 +8,8 @@ import math
 import tf2_ros
 
 def listener():
-    a1, a2 = 0.25, 0.25 
-    b1, b2, b4 = 0.059, 0.16, 0
+    a1, a2 = 0.225, 0.225
+    b1, b2, b4 = 0.301, 0.100, 0.194
     tfBuffer = tf2_ros.Buffer()
     listener = tf2_ros.TransformListener(tfBuffer)
     p = Pose()
@@ -36,53 +36,28 @@ def listener():
         x = trans.transform.translation.x
         y = trans.transform.translation.y
         z = trans.transform.translation.z
-        # tool_frame's orientation : alpha = yaw, beta = pitch, gamma = roll
-        (gamma, beta, alpha) = tf_conversions.transformations.euler_from_quaternion([trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w])
+        # tool_frame's orientation : alpha = roll, beta = pitch, gamma = yaw
+        (alpha,beta,gamma) = tf_conversions.transformations.euler_from_quaternion([trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w])
+        #Value of phi
+        phi = math.atan2((math.sin(alpha)*math.sin(beta)*math.cos(gamma))+(math.cos(alpha)*math.sin(gamma)),math.cos(beta)*math.cos(gamma))
+        #phi = math.atan2(y,x)
+        #Value of theta 2
+        c2 = (math.pow(x,2)+math.pow(y,2)-(math.pow(a1,2)+math.pow(a2,2)))/(2*a1*a2)
+        s2 = -(math.sqrt(abs(1-math.pow(c2,2))))
+        i.theta2 = math.atan2(s2,c2)
+
+        #Value of theta 1
+        c1 = (((a1+(a2*c2))*x)+((a2*s2)*y))/(math.pow((a1+(a2*c2)),2)-math.pow(a2*s2,2))
+        s1 = (((a1+(a2*c2))*y)-((a2*s2)*x))/(math.pow((a1+(a2*c2)),2)-math.pow(a2*s2,2))
+        i.theta1 = math.atan2(s1,c1)
         
-        # rotation matrix of tool_frame with respect to the base frame interms of alpha = yaw, beta = pitch, gamma = roll :
-        #
-        # ⎡1.0⋅cos(α)⋅cos(β)  -1.0⋅sin(α)⋅cos(γ) + sin(β)⋅sin(γ)⋅cos(α)  1.0⋅sin(α)⋅sin(γ) + sin(β)⋅cos(α)⋅cos(γ) ⎤
-        # ⎢                                                                                                       |
-        # ⎢1.0⋅sin(α)⋅cos(β)  sin(α)⋅sin(β)⋅sin(γ) + 1.0⋅cos(α)⋅cos(γ)   sin(α)⋅sin(β)⋅cos(γ) - 1.0⋅sin(γ)⋅cos(α) ⎥
-        # ⎢                                                                                                       |
-        # ⎣   -1.0⋅sin(β)                 1.0⋅sin(γ)⋅cos(β)                         1.0⋅cos(β)⋅cos(γ)             ⎦
-        #
-        #
-        # Transformation matrix of tool_frame with respect to the base frame obtained from T = T1 T2 T3 T4 :
-        #
-        # ⎡ C(124)  -S(124)  0    a1C1 + a2C12      ⎤
-        # ⎢                                         ⎥
-        # ⎢ S(124)  C(124)   0    a1S1 + a2S12      ⎥
-        # ⎢                                         ⎥
-        # ⎢ 0       0        1    b1 + b2 + b3 - b4 ⎥
-        # ⎢                                         ⎥
-        # ⎣ 0       0        0    1                 ⎦
-        #
-        #Transformation matrix obtain from the pose of tool_frame with respect to base frame
-        #
-        # ⎡ C(phi)  -S(phi)  0    x      ⎤
-        # ⎢                              ⎥
-        # ⎢ S(phi)  C(phi)   0    y      ⎥
-        # ⎢                              ⎥
-        # ⎢ 0       0        1    z      ⎥
-        # ⎢                              ⎥
-        # ⎣ 0       0        0    1      ⎦
+        #Value of theta 4
+        i.theta4 = phi - (i.theta1+i.theta2)
+        #Value of b3
+        i.b3 = -(float(format(b1+b2-b4-z,'.3f')))
 
-        phi = math.atan2(math.sin(alpha)*math.cos(beta),math.cos(alpha)*math.cos(beta))
-        theta123 = math.atan2(math.sin(phi),math.cos(phi))
-        #finding theta2 
-        cos_theta2 = (math.pow(x,2)+math.pow(y,2)-math.pow(a1,2)-math.pow(a2,2))/(2*a1*a2)  
-        sin_theta2 = math.sqrt(abs(1-math.pow(cos_theta2,2)))
-        i.theta2 = math.atan2(sin_theta2,cos_theta2)
-        #finding theta1
-        cos_theta1 = (((a1+(a2*cos_theta2))*x)+(a2*sin_theta2*y))/((math.pow(a1+(a2*cos_theta2),2))-(math.pow(a2*sin_theta2,2)))
-        sin_theta1 = (((a1+(a2*cos_theta2))*y)-(a2*sin_theta2*x))/((math.pow(a1+(a2*cos_theta2),2))-(math.pow(a2*sin_theta2,2)))
-        i.theta1 = math.atan2(sin_theta1,cos_theta1)
-        #finding theta4
-        i.theta4 = theta123-i.theta1-i.theta2
-        #finding b3
-        i.b3 = z-b1-b2+b4
 
+        
         joint_pub.publish(i)           #Publish joint's pose
         tool_pub.publish(p)            #Publish  tool frame's pose 
 
