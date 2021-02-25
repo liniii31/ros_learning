@@ -32,7 +32,8 @@ def publisher(omega,radius,rate):
     r = rospy.Rate(rate)
     # timer counter [second]
     tick = 0
-    inc = 1. /rate      #increment of tick for different values of periodic rate
+    inc = 1. /rate     
+    #increment of tick for different values of periodic rate
     while not rospy.is_shutdown():
         theta = omega*tick
         q = tf_conversions.transformations.quaternion_from_euler(0, 0, -theta)
