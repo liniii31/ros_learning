@@ -12,14 +12,18 @@ import math
 def testing():
 	
 	joint_state = JointState()	
-        joint_state.name.append("joint1")
-        joint_state.name.append("joint2")
-        joint_state.name.append("joint3")
-        joint_state.name.append("joint4")
-        joint_state.position.append(0.675599992275)                                          #values for all joints enter manually for testing
-        joint_state.position.append(-0.675599992275)
-        joint_state.position.append(-0.0)
-        joint_state.position.append(0.675599992275)
+        joint_state.name.append("joint_1")
+        joint_state.name.append("joint_2")
+        joint_state.name.append("joint_3")
+        joint_state.name.append("joint_4")
+        joint_state.name.append("joint_5")
+        joint_state.name.append("joint_6")
+        joint_state.position.append(0.573000013828)                            #values for all joints enter manually for testing
+        joint_state.position.append(0.208000004292)
+        joint_state.position.append(0.280000001192)
+        joint_state.position.append(-2.52999997139)
+        joint_state.position.append(1.40999996662)
+        joint_state.position.append(1.48000001907)
         joint_state.velocity.append(0.0)
         joint_state.effort.append(0.0)
         joint_pub = rospy.Publisher("joint_states", JointState, queue_size=1)
@@ -56,6 +60,6 @@ def testing():
 if __name__ == '__main__':
 	rospy.init_node('testing_ik', anonymous=True)
 	try:
-	    testing()       
+	    testing()      
         except rospy.ROSInterruptException:
             pass
