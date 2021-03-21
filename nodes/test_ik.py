@@ -18,12 +18,12 @@ def testing():
         joint_state.name.append("joint_4")
         joint_state.name.append("joint_5")
         joint_state.name.append("joint_6")
-        joint_state.position.append(0.573000013828)                            #values for all joints enter manually for testing
-        joint_state.position.append(0.208000004292)
-        joint_state.position.append(0.280000001192)
-        joint_state.position.append(-2.52999997139)
-        joint_state.position.append(1.40999996662)
-        joint_state.position.append(1.48000001907)
+        joint_state.position.append(0.0)                            #values for all joints enter manually for testing
+        joint_state.position.append(-1.84357976913)
+        joint_state.position.append(-0.727683603764)
+        joint_state.position.append(3.14159274101)
+        joint_state.position.append(0.57032930851)
+        joint_state.position.append(1.03081368582e-16)
         joint_state.velocity.append(0.0)
         joint_state.effort.append(0.0)
         joint_pub = rospy.Publisher("joint_states", JointState, queue_size=1)

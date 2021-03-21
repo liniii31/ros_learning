@@ -10,13 +10,14 @@ from sympy import *
 
 
 def ik():
-    a1, a2, a3, a4, a5, a6 = 0.181500, 0.163500, 0.305000, 0.164500, 0.135500, 0.070000
-    b4 = 0.010000
-    pi = 3.14159
+    a2 = 0.305000
+    d3 = 0.0 
+    a3 = 0.010000
+    d4 = 0.164500
+    #pi = 3.14159
     tfBuffer = tf2_ros.Buffer()
     listener = tf2_ros.TransformListener(tfBuffer)
     i = ik_for_6axis()
-    
     joint_pub = rospy.Publisher('joint_pose', ik_for_6axis, queue_size=1)
     rate = rospy.Rate(10.0)
     while not rospy.is_shutdown():
@@ -28,53 +29,39 @@ def ik():
             rate.sleep()
             continue
         #Finding the first three joint angles i.e. J1,J2,J3
-        x = trans1.transform.translation.x
-        y = trans1.transform.translation.y
-        z = trans1.transform.translation.z
-        q0 = trans1.transform.rotation.x
-        q1 = trans1.transform.rotation.y
-        q2 = trans1.transform.rotation.z
-        q3 = trans1.transform.rotation.w
+        px = trans1.transform.translation.x
+        py = trans1.transform.translation.y
+        pz = trans1.transform.translation.z
         (alpha,beta,gamma) = tf_conversions.transformations.euler_from_quaternion([trans1.transform.rotation.x, trans1.transform.rotation.y, trans1.transform.rotation.z, trans1.transform.rotation.w])
         R_x = Matrix([[1,0,0],[0,math.cos(alpha),-math.sin(alpha)],[0,math.sin(alpha),math.cos(alpha)]])
         R_y = Matrix([[math.cos(beta),0,math.sin(beta)],[0,1,0],[-math.sin(beta),0,math.cos(beta)]])
         R_z = Matrix([[math.cos(gamma),-math.sin(gamma),0],[math.sin(gamma),math.cos(gamma),0],[0,0,1]])
-        R = R_x*R_y*R_z 
-        Px = x - ((a6)*R[0,2])
-        Py = y - ((a6)*R[1,2])
-        Pz = z - ((a6)*R[2,2])
-        i.J1 = float(format(math.atan2(Py,Px),'.3f'))
-        Pxy = math.sqrt(math.pow(Px,2)+math.pow(Py,2))
-        l1 = Pz-(a1+a2)
-        phi2 = math.atan2(l1,Pxy)
-        l2 = math.sqrt(math.pow(l1,2)+math.pow(Pxy,2))
-        l3 =  math.sqrt(math.pow(b4,2)+math.pow((a4+a5),2))
-        phi4 = math.atan2(b4,(a4+a5))
-        C_phi3 = (math.pow(l3,2)+math.pow(a3,2)-math.pow(l2,2))/(2*l3*a3)
-        S_phi3 = math.sqrt(abs(1-math.pow(C_phi3,2)))
-        phi3 = math.atan2(S_phi3,C_phi3)
-        C_phi1 = (math.pow(a3,2)+math.pow(l2,2)-math.pow(l3,2))/(2*l2*a3)
-        S_phi1 = math.sqrt(abs(1-math.pow(C_phi1,2)))
-        phi1 = math.atan2(S_phi1,C_phi1)  
-        i.J2 = float(format((pi/2)-(phi2+phi1),'.3f'))
-        i.J3 = float(format(pi-(phi4+phi3),'.3f'))          
-        #When First three Joint anles are found,
-        #We can start finding the last Three Joint angles
-        R1 = Matrix([[math.cos(i.J1),-math.sin(i.J1),0],[math.sin(i.J1),math.cos(i.J1),0],[0,0,1]])
-        R2 = Matrix([[math.cos(i.J2),0,math.sin(i.J2)],[0,1,0],[-math.sin(i.J2),0,math.cos(i.J2)]])
-        R3 = Matrix([[math.cos(i.J3),0,math.sin(i.J3)],[0,1,0],[-math.sin(i.J3),0,math.cos(i.J3)]])
-        R4 = Matrix([[math.cos(0),-math.sin(0),0],[math.sin(0),math.cos(0),0],[0,0,1]])
-        R03 = R1*R2*R3
-        R03_Inverse = Inverse(R03)
-        #phi = math.atan2((math.sin(alpha)*math.sin(beta)*math.cos(gamma))+(math.cos(alpha)*math.sin(gamma)),math.cos(beta)*math.cos(gamma))
-        #R06 = Matrix([[math.cos(phi),-math.sin(phi),0],[math.sin(phi),math.cos(phi),0],[0,0,1]])
-        R06 = Matrix([[2*(Pow(q0,2)+Pow(q1,2))-1,2*(q1*q2-q0*q3),2*(q1*q3+q0*q2)],[2*(q1*q2+q0*q3),2*(Pow(q0,2)+Pow(q2,2))-1,2*(q2*q3-q0*q1)],[2*(q1*q3-q0*q2),2*(q2*q3+q0*q1),2*(Pow(q0,2)+Pow(q3,2))-1]])
-        R36 = R03_Inverse*R06
-        R04 = R1*R2*R3*R4
-        i.J4 = float(format(math.atan2(R36[1,2],-R36[0,2]),'.2f'))
-        i.J5 = float(format(math.atan2(math.sqrt(abs(1-R36[2,2])),R36[2,2]),'.2f'))
-        i.J6 = float(format(math.atan2(-R36[2,1],-R36[2,0]),'.2f'))
-        joint_pub.publish(i)           #Publish joint's pose
+        R = R_x*R_y*R_z
+        #joint angle 1
+        i.theta1 = math.atan2(py,px)-math.atan2(d3,math.sqrt(abs(Pow(px,2)+Pow(py,2)-Pow(d3,2))))
+        theta1 = i.theta1
+        K = (Pow(px,2)+Pow(py,2)+Pow(pz,2)-Pow(a2,2)-Pow(a3,2)-Pow(d3,2)-Pow(d4,2))/(2*a2)
+        #joint angle 3
+        i.theta3 = math.atan2(a3,d4)-math.atan2(K,math.sqrt(abs(Pow(a3,2)+Pow(d4,2)-Pow(K,2))))
+        theta3 = i.theta3
+        theta23 = math.atan2((-a3-a2*math.cos(theta3))*pz-(math.cos(theta1)*px+math.sin(theta1)*py)*(d4-a2*math.sin(theta3)),(a2*math.sin(theta3)-d4)*pz-(a3+a2*math.cos(theta3))*(math.cos(theta1)*px+math.sin(theta1)*py))
+        #joint angle 2
+        i.theta2 = theta23-i.theta3
+        theta2 = i.theta2
+        #joint angle 4
+        i.theta4 = math.atan2(-R[0,2]*math.sin(theta1)+R[1,2]*math.cos(theta1),-R[0,2]*math.cos(theta1)*math.cos(theta23)-R[1,2]*math.sin(theta1)*math.cos(theta23)+R[2,2]*math.sin(theta23))
+        theta4 = i.theta4
+        s5 = -(R[0,2]*(math.cos(theta1)*math.cos(theta23)*math.cos(theta4)+math.sin(theta1)*math.sin(theta4))+R[1,2]*(math.sin(theta1)*math.cos(theta23)*math.cos(theta4)-math.cos(theta1)*math.sin(theta4))-R[2,2]*(math.sin(theta23)*math.cos(theta4)))
+        c5 = R[0,2]*(-math.cos(theta1)*math.sin(theta23))+R[1,2]*(-math.sin(theta1)*math.sin(theta23))+R[2,2]*(-math.cos(theta23))
+        #joint angle 5
+        i.theta5 = math.atan2(s5,c5)
+        theta5 = i.theta5
+        s6 = -R[0,0]*(math.cos(theta1)*math.cos(theta23)*math.sin(theta4)-math.sin(theta1)*math.cos(theta4))-R[1,0]*(math.sin(theta1)*math.cos(theta23)*math.sin(theta4)+math.cos(theta1)*math.cos(theta4))+R[2,0]*(math.sin(theta23)*math.sin(theta4))
+        c6 = R[0,0]*((math.cos(theta1)*math.cos(theta23)*math.cos(theta4)+math.sin(theta1)*math.sin(theta4))*math.cos(theta5)-math.cos(theta1)*math.sin(theta23)*math.sin(theta5))+R[1,0]*((math.sin(theta1)*math.cos(theta23)*math.cos(theta4)-math.cos(theta1)*math.sin(theta4))*math.cos(theta5)-math.sin(theta1)*math.sin(theta23)*math.sin(theta5))-R[2,0]*(math.sin(theta23)*math.cos(theta4)*math.cos(theta5)+math.cos(theta23)*math.sin(theta5))
+        #joint angle 6
+        i.theta6 = math.atan2(s6,c6)
+        #publishing the joint angles
+        joint_pub.publish(i) 
 
 
 

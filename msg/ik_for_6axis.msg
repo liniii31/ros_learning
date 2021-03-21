@@ -1,6 +1,6 @@
-float32 J1
-float32 J2
-float32 J3
-float32 J4
-float32 J5
-float32 J6
+float32 theta1
+float32 theta2
+float32 theta3
+float32 theta4
+float32 theta5
+float32 theta6
