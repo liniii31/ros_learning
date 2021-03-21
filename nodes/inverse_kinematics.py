@@ -30,8 +30,7 @@ def listener():
         p.orientation.x = trans.transform.rotation.x
         p.orientation.y = trans.transform.rotation.y
         p.orientation.z = trans.transform.rotation.z
-        p.orientation.w = trans.transform.rotation.w
-        
+        p.orientation.w = trans.transform.rotation.w        
         # tool_frame's position : px,py,pz
         x = trans.transform.translation.x
         y = trans.transform.translation.y
@@ -45,19 +44,14 @@ def listener():
         c2 = (math.pow(x,2)+math.pow(y,2)-(math.pow(a1,2)+math.pow(a2,2)))/(2*a1*a2)
         s2 = -(math.sqrt(abs(1-math.pow(c2,2))))
         i.theta2 = math.atan2(s2,c2)
-
         #Value of theta 1
         c1 = (((a1+(a2*c2))*x)+((a2*s2)*y))/(math.pow((a1+(a2*c2)),2)-math.pow(a2*s2,2))
         s1 = (((a1+(a2*c2))*y)-((a2*s2)*x))/(math.pow((a1+(a2*c2)),2)-math.pow(a2*s2,2))
-        i.theta1 = math.atan2(s1,c1)
-        
+        i.theta1 = math.atan2(s1,c1)        
         #Value of theta 4
         i.theta4 = phi - (i.theta1+i.theta2)
         #Value of b3
-        i.b3 = -(float(format(b1+b2-b4-z,'.3f')))
-
-
-        
+        i.b3 = -(float(format(b1+b2-b4-z,'.3f')))        
         joint_pub.publish(i)           #Publish joint's pose
         tool_pub.publish(p)            #Publish  tool frame's pose 
 

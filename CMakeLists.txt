@@ -23,6 +23,7 @@ add_service_files(
  add_message_files(
   FILES
   ik.msg
+  ik_for_6axis.msg
 )
 generate_messages(
    DEPENDENCIES
